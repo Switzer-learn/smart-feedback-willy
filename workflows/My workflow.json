@@ -1,0 +1,408 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "8c6b87d5-1c40-444b-9245-2e8a27bdfa86",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -176,
+        0
+      ],
+      "id": "3f4f30d6-cd45-4560-a046-ac2a2b3db6dc",
+      "name": "Webhook",
+      "webhookId": "8c6b87d5-1c40-444b-9245-2e8a27bdfa86",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "R3sUXTM65cERqItb",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "884a074c-6bae-4e45-a36f-00b1c8b1a956",
+              "leftValue": "={{ $json.description }}",
+              "rightValue": "broken",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "ccee5e66-02a4-4ce0-a658-d9e37bbc2d62",
+              "leftValue": "={{ $json.description }}",
+              "rightValue": "error",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "e360a975-80a8-420f-8fab-48e73934cfb3",
+              "leftValue": "={{ $json.description }}",
+              "rightValue": "urgent",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        512,
+        80
+      ],
+      "id": "820e5f0b-d26c-4118-8a02-20e76cab818a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "feedback",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "priority",
+              "fieldValue": "={{ $json.priority }}"
+            },
+            {
+              "fieldId": "category",
+              "fieldValue": "={{ $json.category }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "Processed"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        864,
+        96
+      ],
+      "id": "2b2c769a-2367-49ba-b6b7-09a64ec8ca56",
+      "name": "Update a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "v8sg0qFmwaUQFa1y",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst data = $input.first().json\nconst output = {\n  \"id\": data.id,\n  \"category\" : \"Bug\",\n  \"priority\" : \"High\"\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        32
+      ],
+      "id": "5f23e51f-1ce6-42ee-8f97-d71a36de0d2a",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst data = $input.first().json\nconst result = {\n  \"id\":data.id,\n  \"category\":\"General\",\n  \"priority\":\"Low\"\n}\n\nreturn result;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        176
+      ],
+      "id": "e6bd43ae-31ea-44a9-8419-965b2547a1ff",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "feedback",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "keyValue": "Pending"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "6d62232c-c581-4500-986b-1134e9695012",
+      "name": "Get a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "v8sg0qFmwaUQFa1y",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze the description below.\n\nRules:\n- If it contains urgency/bug signals like: urgent, broken, error (or similar), set:\n  category = \"Bug\"\n  priority = \"High\"\n- Otherwise:\n  category = \"General\"\n  priority = \"Low\"\n\nReturn ONLY valid JSON (no markdown, no explanation) in this exact shape:\n{\"id\":\"<id>\",\"category\":\"<Category>\",\"priority\":\"<Priority>\"}\n\nid: {{$json.id}}\ndescription: {{$json.description}}\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "c912634c-1d06-471c-b461-1353dd3af795",
+      "name": "AI Agent",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "model": "mistralai/ministral-3b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        80,
+        208
+      ],
+      "id": "cc07d0ae-4139-4d9c-9f20-1b52f29b1da0",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "ZPMEiKMGApEqQiGJ",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"id\":\"id\",\n  \"priority\":\"high\",\n  \"category\":\"bug\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        384,
+        208
+      ],
+      "id": "8276dbcd-2bc1-457c-9f52-783c04aec0a4",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "feedback",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $json.output.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "priority",
+              "fieldValue": "={{ $json.output.priority }}"
+            },
+            {
+              "fieldId": "category",
+              "fieldValue": "={{ $json.output.category }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "Processed"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        512,
+        -48
+      ],
+      "id": "c6b5d392-f100-4764-89ac-32f1ad87f577",
+      "name": "Update a row1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "v8sg0qFmwaUQFa1y",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## AI smart categorization\nAI handle the categorization and prioritization\nIf failed, fallback to use if to manually proceed"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        352,
+        -208
+      ],
+      "id": "353b46d4-cb7f-4e26-847b-e31d6e29b4af",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a row": {
+      "main": [
+        []
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Update a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Update a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a row": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Update a row1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "a7002716-5592-4200-ad83-8cf1fe2bdadd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "58de49749a498786654f1d3a3d8b9425d2f344c37048db63b4aaaf36864d50f1"
+  },
+  "id": "-VTsvt4ezj8JD97TKvWOe",
+  "tags": []
+}
