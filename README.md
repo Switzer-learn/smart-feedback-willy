@@ -22,7 +22,7 @@ A "Smart" Customer Feedback Portal built with Next.js, Supabase, and n8n. This a
 ### 1. Clone the Repository
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/Switzer-learn/smart-feedback-willy.git
 cd smart-feedback-portal
 npm install
 ```
@@ -32,8 +32,9 @@ npm install
 Create a `.env.local` file in the root directory with your Supabase credentials:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_SUPABASE_URL=https://gdeeoqtkozyhvnqwynkh.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=sb_publishable_786WLzqtX2EdeWrFaXM-TA_KHOsV3Gn
+OPENROUTER_API_KEY=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 (i have limited the credit to 1$ as free tier gemini keep hitting the limit :D)
 ```
 
 ### 3. Supabase Setup
@@ -89,3 +90,4 @@ We implement two strict RLS policies to ensure data data isolation:
 -   **Frontend**: Next.js 15 (App Router), Tailwind CSS
 -   **Backend**: Supabase (PostgreSQL, Auth, Realtime)
 -   **Automation**: n8n (Webhook/Polling, Logic, Database Update)
+
