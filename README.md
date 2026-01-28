@@ -35,6 +35,7 @@ Create a `.env.local` file in the root directory with your Supabase credentials:
 NEXT_PUBLIC_SUPABASE_URL=https://gdeeoqtkozyhvnqwynkh.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY=sb_publishable_786WLzqtX2EdeWrFaXM-TA_KHOsV3Gn
 OPENROUTER_API_KEY=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 (i have limited the credit to 1$ as free tier gemini keep hitting the limit :D)
+NEXT_SUPABASE_SECRET_KEY=sb_secret_EmIu5gGuqRJKZNDDRUqQOw_x5GrYi7d (need this for n8n if you want to use mine)
 ```
 
 ### 3. Supabase Setup
